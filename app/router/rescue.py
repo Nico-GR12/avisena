@@ -10,7 +10,7 @@ from app.schemas.users import UserOut
 from app.crud import rescue as crud_rescue
 
 router = APIRouter()
-modulo = 1
+modulo = 5
 
 @router.post("/crear", status_code=status.HTTP_201_CREATED)
 def create_rescue(
@@ -22,16 +22,12 @@ def create_rescue(
         # El rol de quien usa el endpoint
         id_rol = user_token.id_rol
 
-        if (user.id_rol == 1 or user.id_rol == 2):
-            modulo = 2
-        else:
-            modulo = 1
 
         if not verify_permissions(db, id_rol, modulo, 'insertar'):
-            raise HTTPException(status_code=401, detail="Usuario no autorizado")
+            raise HTTPException(status_code=401, detail="Salvamento no autorizado")
 
         crud_rescue.create_rescue(db, user)
-        return {"message": "Usuario creado correctamente"}
+        return {"message": "Salvamento creado correctamente"}
 
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -48,7 +44,7 @@ def get_rescue(
         id_rol = user_token.id_rol 
 
         if not verify_permissions(db, id_rol, modulo, 'seleccionar'):
-            raise HTTPException(status_code=401, detail="Usuario no autorizado")
+            raise HTTPException(status_code=401, detail="Salvamento no autorizado")
         
 
         rescue = crud_rescue.get_rescue_by_id(db, id_salvamento)
