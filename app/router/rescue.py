@@ -14,7 +14,7 @@ modulo = 5
 
 @router.post("/crear", status_code=status.HTTP_201_CREATED)
 def create_rescue(
-    user: RescueCreate, 
+    rescue: RescueCreate, 
     db: Session = Depends(get_db),
     user_token: UserOut = Depends(get_current_user)
 ):
@@ -26,7 +26,7 @@ def create_rescue(
         if not verify_permissions(db, id_rol, modulo, 'insertar'):
             raise HTTPException(status_code=401, detail="Salvamento no autorizado")
 
-        crud_rescue.create_rescue(db, user)
+        crud_rescue.create_rescue(db, rescue)
         return {"message": "Salvamento creado correctamente"}
 
     except SQLAlchemyError as e:
