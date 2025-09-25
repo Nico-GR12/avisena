@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from app.crud.permisos import verify_permissions
-from app.router.dependencies import get_current_user
+from app.router.dependencias import get_current_user
 from app.schemas.rescue import RescueCreate, RescueOut, RescueUpdate
 from core.database import get_db
 from app.schemas.users import UserOut
