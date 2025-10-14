@@ -122,5 +122,23 @@ def get_user_by_id(db:Session, id:int):
     except SQLAlchemyError as e:
         logger.error(f"Error al obtener usuario por id: {e}")
         raise Exception("Error de base de datos al obtener el usuario")
+    
+
+def change_user_status(db: Session, id_usuario: int, nuevo_estado: bool) -> bool:
+    try:
+        sentencia = text("""
+            UPDATE usuarios
+            SET estado = :estado
+            WHERE id_usuario = :id_usuario
+        """)
+        result = db.execute(sentencia, {"estado": nuevo_estado, "id_usuario": id_usuario})
+        db.commit()
+
+        return result.rowcount > 0
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        logger.error(f"Error al cambiar el estado del usuario {id_usuario}: {e}")
+        raise Exception("Error de base de datos al cambiar el estado del usuario")
 
 

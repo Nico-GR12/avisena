@@ -11,7 +11,7 @@ app.include_router(users.router, prefix="/users", tags=["users"])
 # app.include_router(fincas.router, prefix="/fincas", tags=["fincas"])
 app.include_router(fincas.router, prefix="/fincas", tags=["fincas"])
 app.include_router(auth.router, prefix='/access', tags=["login"])
-# app.include_router(rescue.router, prefix="/rescue", tags=["rescue"])    
+app.include_router(rescue.router, prefix="/rescue", tags=["rescue"])    
 
 # Configuración de CORS para permitir todas las solicitudes desde cualquier origen
 app.add_middleware(
