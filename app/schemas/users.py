@@ -7,7 +7,7 @@ class UserBase(BaseModel):
     email: EmailStr
     telefono: str = Field(min_length=7, max_length=15)
     documento: str = Field(min_length=8, max_length=20)
-    estado: bool
+    estado: bool  = Field(default=True)
 
 class UserCreate(UserBase):
     pass_hash: str = Field(min_length=8)
