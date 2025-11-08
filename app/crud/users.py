@@ -35,8 +35,9 @@ def create_user(db: Session, user: UserCreate) -> Optional[bool]:
 
 def get_user_by_email_for_login(db: Session, email: str):
     try:
-        query = text("""SELECT id_usuario, nombre, documento, usuarios.id_rol,
-                        email, telefono, estado, nombre_rol, pass_hash 
+        query = text("""SELECT usuarios.id_usuario, usuarios.nombre, usuarios.id_rol,
+                        usuarios.email, usuarios.telefono,
+                        usuarios.documento, usuarios.pass_hash, usuarios.estado roles.nombre_rol
                         FROM usuarios 
                         INNER JOIN roles ON usuarios.id_rol = roles.id_rol
                         WHERE email = :correo""")
@@ -49,8 +50,9 @@ def get_user_by_email_for_login(db: Session, email: str):
 
 def get_all_user_except_admins(db: Session):
     try:
-        query = text("""SELECT id_usuario, nombre, documento, usuarios.id_rol,
-                        email, telefono, estado, nombre_rol 
+        query = text("""SELECT usuarios.id_usuario, usuarios.nombre, usuarios.id_rol,
+                        usuarios.email, usuarios.telefono,
+                        usuarios.documento, usuarios.pass_hash, usuarios.estado roles.nombre_rol 
                         FROM usuarios 
                         INNER JOIN roles ON usuarios.id_rol = roles.id_rol
                         WHERE usuarios.id_rol NOT IN (1,2)
@@ -65,8 +67,9 @@ def get_all_user_except_admins(db: Session):
 
 def get_user_by_email(db: Session, email: str):
     try:
-        query = text("""SELECT id_usuario, nombre, documento, usuarios.id_rol,
-                        email, telefono, estado, nombre_rol 
+        query = text("""SELECT usuarios.id_usuario, usuarios.nombre, usuarios.id_rol,
+                        usuarios.email, usuarios.telefono,
+                        usuarios.documento, usuarios.pass_hash, usuarios.estado roles.nombre_rol
                         FROM usuarios 
                         INNER JOIN roles ON usuarios.id_rol = roles.id_rol
                         WHERE email = :correo""")
@@ -110,8 +113,9 @@ def update_user_by_id(db: Session, user_id: int, user: UserUpdate) -> Optional[b
     
 def get_user_by_id(db:Session, id:int):
     try:
-        query = text(""" SELECT id_usuario, nombre, documento, usuarios.id_rol,
-                        email, telefono, estado, nombre_rol
+        query = text(""" SELECT usuarios.id_usuario, usuarios.nombre, usuarios.id_rol,
+                        usuarios.email, usuarios.telefono,
+                        usuarios.documento, usuarios.pass_hash, usuarios.estado roles.nombre_rol
                         FROM usuarios
                         JOIN roles ON usuarios.id_rol = roles.id_rol
                         WHERE id_usuario = :id_usuario

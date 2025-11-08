@@ -13,9 +13,9 @@ def create_fincas(db: Session, finca: FincasCreate) -> Optional[bool]:
     try:
         query = text("""
             INSERT INTO fincas (
-                nombre_finca, longitud, latitud, id_usuario, estado_finca
+                nombre, longitud, latitud, estado
             ) VALUES (
-                :nombre_finca, :longitud, :latitud, :id_usuario, :estado_finca
+                :nombre, :longitud, :latitud, :estado
             )
         """)
         db.execute(query, finca.model_dump())
@@ -29,10 +29,9 @@ def create_fincas(db: Session, finca: FincasCreate) -> Optional[bool]:
 
 def get_finca_by_id(db: Session, id_finca: int):
     try:
-        query = text("""SELECT id_finca, nombre_finca, longitud, latitud,
-                    fincas.id_usuario, estado_finca
+        query = text("""SELECT id_finca, nombre, longitud, latitud,
+                    estado
                     FROM fincas 
-                    INNER JOIN usuarios ON usuarios.id_usuario = fincas.id_usuario
                     WHERE id_finca = :finca_id""")
         result = db.execute(query, {"finca_id": id_finca}).mappings().first()
         return result
