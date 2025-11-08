@@ -16,13 +16,13 @@ def create_user(db: Session, user: UserCreate) -> Optional[bool]:
 
         query = text("""
             INSERT INTO usuarios (
-                nombre, documento, id_rol,
-                email, pass_hash,
-                telefono, estado
+                nombre, id_rol,
+                email, telefono,
+                documento, pass_hash, estado
             ) VALUES (
-                :nombre, :documento, :id_rol,
-                :email, :pass_hash, 
-                :telefono, :estado
+                :nombre, :id_rol,
+                :email, :telefono, 
+                :documento, :pass_hash, :estado
             )
         """)
         db.execute(query, user.model_dump())
