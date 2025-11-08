@@ -29,17 +29,17 @@ def create_rescue(db: Session, rescue: RescueCreate) -> Optional[bool]:
 def get_rescue_by_id(db: Session, id_salvamento: int):
     try:
         query = text("""SELECT salvamento.id_salvamento, salvamento.id_galpon, salvamento.fecha, salvamento.id_tipo_gallina, 
-                        salvamento.cantidad_gallinas,  galpones.nombre_galpon, tipo_gallinas.nombre_tipo_gallina
+                        salvamento.cantidad_gallinas,  galpones.nombre, tipo_gallinas.raza
                         FROM salvamento
                         JOIN galpones ON salvamento.id_galpon = galpones.id_galpon
-                        JOIN tipo_gallinas ON salvamento.id_tipo_gallina = tipo_gallinas.id_tipo_gallina
+                        JOIN tipo_gallinas ON salvamento.id_tipo_gallina = tipo_gallinas.id_tipo_gallinas
                         WHERE id_salvamento = :salvamento_id
                     """)
         result = db.execute(query, {"salvamento_id": id_salvamento}).mappings().first()
         return result
     except SQLAlchemyError as e:
         logger.error(f"Error al obtener salvamento por id: {e}")
-        raise Exception("Error de base de datos al obtener la salvamento")
+        raise Exception("Error de base de datos al obtener el salvamento")
 
 
 def update_rescue_by_id(db: Session, id_salvamento: int, rescue:RescueUpdate) -> Optional[bool]:

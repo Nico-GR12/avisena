@@ -21,5 +21,5 @@ class RescueUpdate(BaseModel):
 
 class RescueOut(RescueBase):
     id_salvamento: int
-    nombre_galpon: str
-    nombre_tipo_gallina: str
+    nombre: str
+    raza: str

@@ -140,5 +140,49 @@ def change_user_status(db: Session, id_usuario: int, nuevo_estado: bool) -> bool
         db.rollback()
         logger.error(f"Error al cambiar el estado del usuario {id_usuario}: {e}")
         raise Exception("Error de base de datos al cambiar el estado del usuario")
+    
+
+# OFFSET :skip Salta un numero de filas (por ejemplo, los usuarios ya mostrados).
+# FETCH NEXT :Limit ROWS ONLY obtiene solo las filas de esa pagina 
+# Usamos parametros :skip y :limit para evitar inyeccion sqlñ
+
+def get_all_user_except_admins_pag(db: Session, skip: int = 0, limit: int = 10):
+    """
+    Obtiene los usuarios  (excepto administradores) con paginacion.
+    Tambien realiza una segunda consulta para contar total de usuarios.
+    Compatible con PostgreSQL, MySQL y SQLite
+    """
+    try:
+        # 1. Contar total de usuarios excepto admins
+        count_query = text("""
+            SELECT COUNT(id_usuario) AS total
+            FROM usuarios
+            WHERE id_rol NOT IN (1,2)
+            """)
+        total_result = db.execute(count_query).scalar()
+    
+        # 2. Consultar usuarios paginados
+        data_query = text("""
+            SELECT id_usuario, nombre, documento, usuarios.id_rol,
+                    email, telefono, estado, nombre_rol
+            FROM usuarios
+            JOIN roles ON usuarios.id_rol = roles.id_rol
+            WHERE usuarios.id_rol NOT IN (1,2)
+            ORDER BY id_usuario
+            LIMIT :limit OFFSET :skip
+        """)
+
+        result = db.execute(data_query, {"skip": skip, "limit": limit}).mappings().all()
+
+        # 3. Retornar resultados
+        return {
+            "total": total_result or 0,
+            "users": [dict(row) for row in result]
+        }
+    
+    except SQLAlchemyError as e:
+        logger.error(f"error al obtener los usuarios: {e}", exc_info=True)
+        raise Exception("Error de base de datos al obtener los usuarios")
+        
 
 

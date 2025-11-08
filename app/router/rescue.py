@@ -16,15 +16,15 @@ modulo = 5
 def create_rescue(
     rescue: RescueCreate, 
     db: Session = Depends(get_db),
-    user_token: UserOut = Depends(get_current_user)
+    #user_token: UserOut = Depends(get_current_user)
 ):
     try:
         # El rol de quien usa el endpoint
-        id_rol = user_token.id_rol
+        # id_rol = user_token.id_rol
 
 
-        if not verify_permissions(db, id_rol, modulo, 'insertar'):
-            raise HTTPException(status_code=401, detail="Salvamento no autorizado")
+        # if not verify_permissions(db, id_rol, modulo, 'insertar'):
+        #     raise HTTPException(status_code=401, detail="Usuario no autorizado")
 
         crud_rescue.create_rescue(db, rescue)
         return {"message": "Salvamento creado correctamente"}
@@ -37,19 +37,19 @@ def create_rescue(
 def get_rescue(
     id_salvamento: int, 
     db: Session = Depends(get_db), 
-    user_token: UserOut = Depends(get_current_user)
+    # user_token: UserOut = Depends(get_current_user)
     ):
 
     try:
-        id_rol = user_token.id_rol 
+        # id_rol = user_token.id_rol 
 
-        if not verify_permissions(db, id_rol, modulo, 'seleccionar'):
-            raise HTTPException(status_code=401, detail="Salvamento no autorizado")
+        # if not verify_permissions(db, id_rol, modulo, 'seleccionar'):
+        #     raise HTTPException(status_code=401, detail="Usuario no autorizado")
         
 
         rescue = crud_rescue.get_rescue_by_id(db, id_salvamento)
         if not rescue:
-            raise HTTPException(status_code=404, detail="Finca no encontrada")
+            raise HTTPException(status_code=404, detail="Salvamento no encontrada")
         return rescue
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))    
@@ -60,7 +60,7 @@ def update_user(
     id_salvamento: int, 
     rescue: RescueUpdate, 
     db: Session = Depends(get_db),
-    user_token: UserOut = Depends(get_current_user)
+    # user_token: UserOut = Depends(get_current_user)
 ):
     try:
         success = crud_rescue.update_rescue_by_id(db, id_salvamento, rescue)
