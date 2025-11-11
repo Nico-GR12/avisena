@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.crud.permisos import verify_permissions
 from app.router.dependencias import get_current_user
 from core.database import get_db
-from app.schemas.users import UserCreate, UserOut, UserUpdate
+from app.schemas.users import UserCreate, UserOut, UserPaginatedResponse, UserUpdate
 from app.crud import users as crud_users
 
 router = APIRouter()
@@ -117,7 +117,7 @@ def change_user_status(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/all-except-admins-pag", response_model=dict)
+@router.get("/all-except-admins-pag", response_model=UserPaginatedResponse)
 def get_users_pag(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),

@@ -72,7 +72,7 @@ def get_user_by_email(db: Session, email: str):
                         usuarios.documento, usuarios.pass_hash, usuarios.estado, roles.nombre_rol
                         FROM usuarios 
                         INNER JOIN roles ON usuarios.id_rol = roles.id_rol
-                        WHERE email = :correo""")
+                        WHERE usuarios.email = :correo""")
         result = db.execute(query, {"correo": email}).mappings().first()
         return result
     except SQLAlchemyError as e:

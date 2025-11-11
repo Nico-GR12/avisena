@@ -1,6 +1,6 @@
 from datetime import date
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import List, Optional
 
 
 
@@ -23,3 +23,10 @@ class RescueOut(RescueBase):
     id_salvamento: int
     nombre: str
     raza: str
+
+class RescuePaginatedResponse(BaseModel):
+    page: int
+    page_size: int
+    total_rescues: int
+    total_pages: int
+    rescues: List[RescueOut]

@@ -1,3 +1,4 @@
+from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import text
@@ -41,6 +42,22 @@ def get_rescue_by_id(db: Session, id_salvamento: int):
         logger.error(f"Error al obtener salvamento por id: {e}")
         raise Exception("Error de base de datos al obtener el salvamento")
 
+def get_all_rescues(db: Session):
+    try:
+        query = text("""SELECT salvamento.id_salvamento, salvamento.id_galpon, salvamento.fecha, 
+                        salvamento.id_tipo_gallina, salvamento.cantidad_gallinas,  
+                        galpones.nombre as nombre, 
+                        tipo_gallinas.raza as raza
+                        FROM salvamento
+                        JOIN galpones ON salvamento.id_galpon = galpones.id_galpon
+                        JOIN tipo_gallinas ON salvamento.id_tipo_gallina = tipo_gallinas.id_tipo_gallinas
+                        ORDER BY salvamento.fecha DESC, salvamento.id_salvamento DESC
+                    """)
+        result = db.execute(query).mappings().all()
+        return result
+    except SQLAlchemyError as e:
+        logger.error(f"Error al obtener todos los salvamentos: {e}")
+        raise Exception("Error de base de datos al obtener los salvamentos")
 
 def update_rescue_by_id(db: Session, id_salvamento: int, rescue:RescueUpdate) -> Optional[bool]:
     try:
@@ -73,3 +90,109 @@ def update_rescue_by_id(db: Session, id_salvamento: int, rescue:RescueUpdate) ->
         logger.error(f"Error al actualizar salvamento {id_salvamento}: {e}")
         raise Exception("Error de base de datos al actualizar la salvamento")
     
+def delete_rescue_by_id(db: Session, id_salvamento: int) -> Optional[bool]:
+    try:
+        query = text("""
+            DELETE FROM salvamento 
+            WHERE id_salvamento = :id_salvamento
+        """)
+        result = db.execute(query, {"id_salvamento": id_salvamento})
+        db.commit()
+        return result.rowcount > 0
+    except SQLAlchemyError as e:
+        db.rollback()
+        logger.error(f"Error al eliminar salvamento {id_salvamento}: {e}")
+        raise Exception("Error de base de datos al eliminar el salvamento")
+    
+def get_all_rescues_pag(db: Session, skip: int = 0, limit: int = 10):
+    """
+    Obtiene los salvamentos con paginación.
+    """
+    try:
+        # 1. Contar total de salvamentos
+        count_query = text("""
+            SELECT COUNT(id_salvamento) AS total
+            FROM salvamento
+        """)
+        total_result = db.execute(count_query).scalar()
+    
+        # 2. Consultar salvamentos paginados - CON NOMBRES REALES DE COLUMNAS
+        data_query = text("""
+            SELECT salvamento.id_salvamento, salvamento.id_galpon, salvamento.fecha, 
+                   salvamento.id_tipo_gallina, salvamento.cantidad_gallinas,
+                   galpones.nombre as nombre, 
+                   tipo_gallinas.raza as raza
+            FROM salvamento
+            JOIN galpones ON salvamento.id_galpon = galpones.id_galpon
+            JOIN tipo_gallinas ON salvamento.id_tipo_gallina = tipo_gallinas.id_tipo_gallinas
+            ORDER BY salvamento.fecha DESC, salvamento.id_salvamento DESC
+            LIMIT :limit OFFSET :skip
+        """)
+
+        result = db.execute(data_query, {"skip": skip, "limit": limit}).mappings().all()
+
+        # 3. Retornar resultados
+        return {
+            "total": total_result or 0,
+            "rescues": [dict(row) for row in result]
+        }
+    
+    except SQLAlchemyError as e:
+        logger.error(f"Error al obtener los salvamentos: {e}", exc_info=True)
+        raise Exception(f"Error de base de datos al obtener los salvamentos: {str(e)}")
+    
+def get_rescues_by_date_range_pag(
+    db: Session, 
+    fecha_inicio: date, 
+    fecha_fin: date, 
+    skip: int = 0, 
+    limit: int = 10
+):
+    """
+    Obtiene los salvamentos con paginación filtrados por rango de fechas.
+    """
+    try:
+        # 1. Contar total de salvamentos en el rango de fechas
+        count_query = text("""
+            SELECT COUNT(id_salvamento) AS total
+            FROM salvamento
+            WHERE fecha BETWEEN :fecha_inicio AND :fecha_fin
+        """)
+        total_result = db.execute(
+            count_query, 
+            {"fecha_inicio": fecha_inicio, "fecha_fin": fecha_fin}
+        ).scalar()
+    
+        # 2. Consultar salvamentos paginados en el rango de fechas
+        data_query = text("""
+            SELECT salvamento.id_salvamento, salvamento.id_galpon, salvamento.fecha, 
+                    salvamento.id_tipo_gallina, salvamento.cantidad_gallinas,
+                    galpones.nombre as nombre, 
+                    tipo_gallinas.raza as raza
+            FROM salvamento
+            JOIN galpones ON salvamento.id_galpon = galpones.id_galpon
+            JOIN tipo_gallinas ON salvamento.id_tipo_gallina = tipo_gallinas.id_tipo_gallinas
+            WHERE salvamento.fecha BETWEEN :fecha_inicio AND :fecha_fin
+            ORDER BY salvamento.fecha DESC, salvamento.id_salvamento DESC
+            LIMIT :limit OFFSET :skip
+        """)
+
+        result = db.execute(
+            data_query, 
+            {
+                "fecha_inicio": fecha_inicio, 
+                "fecha_fin": fecha_fin,
+                "skip": skip, 
+                "limit": limit
+            }
+        ).mappings().all()
+
+        # 3. Retornar resultados
+        return {
+            "total": total_result or 0,
+            "rescues": [dict(row) for row in result]
+        }
+    
+    except SQLAlchemyError as e:
+        logger.error(f"Error al obtener los salvamentos por rango de fechas: {e}", exc_info=True)
+        raise Exception(f"Error de base de datos al obtener los salvamentos: {str(e)}")
